@@ -877,3 +877,162 @@ h2 { font-size: clamp(1.3rem, 2.5vw, 2.1rem); color: var(--text); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+
+/* ══ FLOWER GIFT ════════════════════════════════════════════════════ */
+.flower-section{
+  margin-top:22px;
+  border-radius:32px;
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.flower-gift{
+  display:grid;
+  grid-template-columns:1fr 1.2fr 1fr;
+  gap:18px;
+  align-items:center;
+}
+.flower-card{
+  min-height:280px;
+  border-radius:26px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  position:relative;
+  overflow:hidden;
+}
+.bloom-left,.bloom-right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.stem{
+  position:absolute;
+  bottom:0;
+  width:10px;
+  height:62%;
+  background:linear-gradient(180deg, #7fc66f, #2e6f4f);
+  border-radius:999px;
+  transform-origin:bottom center;
+  animation:sway 4.6s ease-in-out infinite;
+}
+.bloom-left .stem{left:50%; transform:translateX(-50%) rotate(-3deg)}
+.bloom-right .stem{right:50%; transform:translateX(50%) rotate(3deg)}
+
+.flower{
+  position:relative;
+  width:160px;
+  height:160px;
+  filter:drop-shadow(0 0 18px rgba(255,122,182,.15));
+}
+.flower span, .flower i, .bouquet-flower, .bouquet-leaf{
+  position:absolute;
+}
+.flower span{
+  inset:50% auto auto 50%;
+  width:58px; height:58px;
+  margin:-29px 0 0 -29px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff, #ffd2e3 38%, #ff7ab6 100%);
+  transform-origin:center center;
+  box-shadow:0 0 20px rgba(255,122,182,.2);
+}
+.flower span:nth-child(1){transform:translate(-50%,-50%) rotate(0deg) translateY(-52px)}
+.flower span:nth-child(2){transform:translate(-50%,-50%) rotate(90deg) translateY(-52px)}
+.flower span:nth-child(3){transform:translate(-50%,-50%) rotate(180deg) translateY(-52px)}
+.flower span:nth-child(4){transform:translate(-50%,-50%) rotate(270deg) translateY(-52px)}
+.flower i{
+  inset:50%;
+  width:40px; height:40px;
+  margin:-20px 0 0 -20px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff8d8, #f6d88a 70%, #c79f34 100%);
+  box-shadow:0 0 18px rgba(246,216,138,.22);
+}
+.flower.rose{animation:bloomIn 2.8s ease-in-out infinite alternate}
+.flower.gold{animation:bloomIn 3.2s ease-in-out infinite alternate reverse}
+
+@keyframes bloomIn{
+  from{transform:scale(.92) rotate(-3deg)}
+  to{transform:scale(1.03) rotate(3deg)}
+}
+@keyframes sway{
+  0%,100%{transform:translateX(-50%) rotate(-4deg)}
+  50%{transform:translateX(-50%) rotate(4deg)}
+}
+.bouquet-center{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  padding:22px;
+}
+.bouquet-wrap{
+  width:min(360px, 90%);
+  height:240px;
+  position:relative;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,.06), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.bouquet-flower{
+  border-radius:50%;
+  animation:bouquetPulse 3.5s ease-in-out infinite;
+}
+.bouquet-flower.big{
+  width:122px; height:122px; left:50%; top:40px; transform:translateX(-50%);
+  background:radial-gradient(circle at 35% 35%, #fff, #ffd2e3 38%, #ff7ab6 100%);
+  box-shadow:0 0 20px rgba(255,122,182,.2);
+}
+.bouquet-flower.small{
+  width:72px; height:72px;
+  background:radial-gradient(circle at 35% 35%, #fff, #fff1bf 38%, #f6d88a 100%);
+}
+.bouquet-flower.s1{left:52px; top:86px}
+.bouquet-flower.s2{right:56px; top:84px}
+.bouquet-flower.s3{left:50%; bottom:44px; transform:translateX(-50%)}
+.bouquet-leaf{
+  width:86px; height:26px;
+  background:linear-gradient(90deg, #2c7b52, #8ad17b);
+  border-radius:999px;
+  filter:blur(.1px);
+}
+.bouquet-leaf.l1{left:42px; bottom:34px; transform:rotate(-28deg)}
+.bouquet-leaf.l2{right:40px; bottom:34px; transform:rotate(28deg)}
+.bouquet-ribbon{
+  margin-top:14px;
+  padding:10px 16px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(255,122,182,.18), rgba(246,216,138,.16));
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  font-family:'Dancing Script', cursive;
+  font-size:1.5rem;
+  letter-spacing:.02em;
+  box-shadow:0 12px 24px rgba(0,0,0,.2);
+}
+@keyframes bouquetPulse{
+  0%,100%{transform:scale(.98)}
+  50%{transform:scale(1.04)}
+}
+.flower-actions{
+  display:flex;
+  justify-content:center;
+  margin-top:18px;
+}
+
+.music-section .music-info .music-desc{
+  color:var(--muted);
+}
+.music-section button:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+#gallerySection{
+  margin-top:22px;
+}

@@ -15,6 +15,8 @@ const closeSurprise = document.getElementById('closeSurprise');
 const confettiBtn   = document.getElementById('confettiBtn');
 const musicBtn      = document.getElementById('musicBtn');
 const audioToggle   = document.getElementById('audioToggle');
+const flowerGift    = document.getElementById('flowerGift');
+const toGalleryBtn  = document.getElementById('toGalleryBtn');
 const audio         = document.getElementById('loveAudio');
 const audioState    = document.getElementById('audioState');
 const petals        = document.getElementById('petals');
@@ -27,6 +29,7 @@ const cursorSparks  = document.getElementById('cursorSparks');
 const firefliesEl   = document.getElementById('fireflies');
 
 const pad = n => String(n).padStart(2, '0');
+let musicUnlocked = false;
 
 /* ══ LOADER ══════════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
@@ -79,6 +82,29 @@ function updateTimer() {
 }
 updateTimer();
 setInterval(updateTimer, 1000);
+
+
+function unlockMusic() {
+  if (musicUnlocked) return;
+  musicUnlocked = true;
+  musicBtn.disabled = false;
+  audioToggle.disabled = false;
+  audioState.textContent = 'Siap diputar. Surat sudah terbuka.';
+  musicBtn.innerHTML = '<span class="btn-icon">♪</span> Putar Lagu';
+  audioToggle.innerHTML = '<span id="playIcon">▶ Play</span>';
+}
+
+async function playMusicAfterLetter() {
+  try {
+    if (audio.paused) {
+      await audio.play();
+      setPlaying(true);
+    }
+  } catch (err) {
+    audioState.textContent = 'Klik tombol musik sekali lagi jika browser menahan autoplay.';
+    setPlaying(false);
+  }
+}
 
 /* ══ GALLERY ═════════════════════════════════════════════════════════ */
 let currentPhotoIdx = 0;
@@ -172,21 +198,44 @@ function launchConfetti(count = 200) {
   }
 }
 
-function revealFinal() {
-  finalBanner.classList.add('show');
-  launchConfetti(220);
-  setTimeout(() => finalBanner.classList.remove('show'), 7500);
-}
 function scrollToLetter() {
   document.getElementById('letterSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-openLetterBtn.addEventListener('click', () => { scrollToLetter(); setTimeout(showModal, 600); });
+function showFinalSequence() {
+  finalBanner.classList.add('show');
+  launchConfetti(220);
+  hideModal();
+  setTimeout(() => {
+    finalBanner.classList.remove('show');
+    flowerGift.classList.add('visible');
+    flowerGift.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    launchConfetti(120);
+    // gently hint the gallery below after the flower moment
+    setTimeout(() => {
+      const gallerySection = document.getElementById('gallerySection');
+      if (gallerySection) {
+        gallerySection.classList.add('visible');
+      }
+    }, 1600);
+  }, 5200);
+}
+
+openLetterBtn.addEventListener('click', () => {
+  unlockMusic();
+  scrollToLetter();
+  playMusicAfterLetter();
+  setTimeout(showModal, 600);
+});
 surpriseBtn.addEventListener('click', showModal);
-finalBtn.addEventListener('click', revealFinal);
+finalBtn.addEventListener('click', showFinalSequence);
 closeModal.addEventListener('click', hideModal);
 closeSurprise.addEventListener('click', hideModal);
-confettiBtn.addEventListener('click', () => { launchConfetti(260); revealFinal(); hideModal(); });
+confettiBtn.addEventListener('click', () => { showFinalSequence(); });
+toGalleryBtn.addEventListener('click', () => {
+  const gallerySection = document.getElementById('gallerySection');
+  if (gallerySection) gallerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 /* ══ MUSIC ═══════════════════════════════════════════════════════════ */
 function setPlaying(playing) {
@@ -194,18 +243,24 @@ function setPlaying(playing) {
     audioState.textContent = 'Lagu sedang diputar ♪';
     playIcon.textContent = '⏸ Pause';
     musicBtn.innerHTML = '<span class="btn-icon">⏸</span> Jeda Musik';
+    audioToggle.innerHTML = '<span id="playIcon">⏸ Pause</span>';
     vinyl.classList.add('spinning');
     npDot.classList.add('active');
   } else {
-    audioState.textContent = audio.ended ? 'Lagu selesai diputar.' : 'Lagu dijeda.';
+    audioState.textContent = audio.ended ? 'Lagu selesai diputar.' : (musicUnlocked ? 'Lagu dijeda.' : 'Buka surat dulu, lalu lagunya akan menyala.');
     playIcon.textContent = '▶ Play';
-    musicBtn.innerHTML = '<span class="btn-icon">♪</span> Putar Lagu';
+    musicBtn.innerHTML = musicUnlocked ? '<span class="btn-icon">♪</span> Putar Lagu' : '<span class="btn-icon">🔒</span> Terkunci';
+    audioToggle.innerHTML = `<span id="playIcon">${musicUnlocked ? '▶ Play' : '🔒 Terkunci'}</span>`;
     vinyl.classList.remove('spinning');
     npDot.classList.remove('active');
   }
 }
 
 function toggleMusic() {
+  if (!musicUnlocked) {
+    audioState.textContent = 'Buka surat dulu, lalu lagunya akan otomatis menyala.';
+    return;
+  }
   if (audio.paused) {
     audio.play()
       .then(() => setPlaying(true))
@@ -348,3 +403,4 @@ makeFireflies();
 spawnPetals();
 setupReveal();
 observeGallery();
+setPlaying(false);
