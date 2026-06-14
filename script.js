@@ -29,6 +29,8 @@ const cursorSparks  = document.getElementById('cursorSparks');
 const firefliesEl   = document.getElementById('fireflies');
 
 const pad = n => String(n).padStart(2, '0');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 let musicUnlocked = false;
 
 /* ══ LOADER ══════════════════════════════════════════════════════════ */
@@ -45,29 +47,31 @@ window.addEventListener('scroll', () => {
 /* ══ CURSOR SPARKLE ══════════════════════════════════════════════════ */
 const sparkColors = ['#ff7ab6','#f6d88a','#a07eff','#ffffff','#ffadd8','#c0aaff'];
 let lastSpark = 0;
-document.addEventListener('mousemove', e => {
-  const now = Date.now();
-  if (now - lastSpark < 60) return;
-  lastSpark = now;
+if (!isCoarsePointer && !prefersReducedMotion) {
+  document.addEventListener('mousemove', e => {
+    const now = Date.now();
+    if (now - lastSpark < 80) return;
+    lastSpark = now;
 
-  for (let i = 0; i < 3; i++) {
-    const el = document.createElement('span');
-    el.className = 'spark';
-    const size = 3 + Math.random() * 5;
-    el.style.cssText = `
-      left:${e.clientX - size/2}px;
-      top:${e.clientY - size/2}px;
-      width:${size}px; height:${size}px;
-      background:${sparkColors[Math.floor(Math.random() * sparkColors.length)]};
-      --dx:${(Math.random()-0.5)*40}px;
-      --dy:${(Math.random()-0.5)*40}px;
-      animation-duration:${.5 + Math.random()*.5}s;
-      animation-delay:${i * 40}ms;
-    `;
-    cursorSparks.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-  }
-});
+    for (let i = 0; i < 2; i++) {
+      const el = document.createElement('span');
+      el.className = 'spark';
+      const size = 3 + Math.random() * 4;
+      el.style.cssText = `
+        left:${e.clientX - size/2}px;
+        top:${e.clientY - size/2}px;
+        width:${size}px; height:${size}px;
+        background:${sparkColors[Math.floor(Math.random() * sparkColors.length)]};
+        --dx:${(Math.random()-0.5)*32}px;
+        --dy:${(Math.random()-0.5)*32}px;
+        animation-duration:${.45 + Math.random()*.4}s;
+        animation-delay:${i * 30}ms;
+      `;
+      cursorSparks.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }
+  });
+}
 
 /* ══ TIMER ═══════════════════════════════════════════════════════════ */
 function updateTimer() {
@@ -179,7 +183,7 @@ const petalStyles = [
   'linear-gradient(180deg, rgba(255,200,230,.95), rgba(160,126,255,.8))',
 ];
 
-function launchConfetti(count = 200) {
+function launchConfetti(count = isCoarsePointer ? 28 : 45) {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const el = document.createElement('span');
@@ -204,13 +208,13 @@ function scrollToLetter() {
 
 function showFinalSequence() {
   finalBanner.classList.add('show');
-  launchConfetti(220);
+  launchConfetti();
   hideModal();
   setTimeout(() => {
     finalBanner.classList.remove('show');
     flowerGift.classList.add('visible');
     flowerGift.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    launchConfetti(120);
+    launchConfetti(isCoarsePointer ? 60 : 90);
     // gently hint the gallery below after the flower moment
     setTimeout(() => {
       const gallerySection = document.getElementById('gallerySection');
@@ -287,7 +291,7 @@ function makeStars() {
     canvas.style.width  = window.innerWidth  + 'px';
     canvas.style.height = window.innerHeight + 'px';
     ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    const count = Math.min(240, Math.floor(window.innerWidth / 7));
+    const count = Math.min(isCoarsePointer ? 24 : 60, Math.floor(window.innerWidth / (isCoarsePointer ? 28 : 18)));
     stars = Array.from({ length: count }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
@@ -297,7 +301,7 @@ function makeStars() {
       ta: Math.random() * Math.PI * 2,
     }));
     // Some extra bright twinkle stars
-    twinkle = Array.from({ length: 20 }, () => ({
+    twinkle = Array.from({ length: isCoarsePointer ? 2 : 5 }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       r: 1.5 + Math.random() * 1,
@@ -338,7 +342,7 @@ function makeStars() {
 
 /* ══ FIREFLIES ═══════════════════════════════════════════════════════ */
 function makeFireflies() {
-  const count = 22;
+  const count = isCoarsePointer ? 3 : 6;
   for (let i = 0; i < count; i++) {
     const el  = document.createElement('div');
     el.className = 'firefly';
@@ -362,7 +366,10 @@ function makeFireflies() {
 
 /* ══ FALLING PETALS ══════════════════════════════════════════════════ */
 function spawnPetals() {
-  setInterval(() => {
+  const maxAlive = isCoarsePointer ? 4 : 6;
+  const delay = isCoarsePointer ? 3800 : 2600;
+
+  const spawn = () => {
     const el = document.createElement('span');
     el.className = 'petal';
     el.style.left = Math.random() * 100 + 'vw';
@@ -374,8 +381,16 @@ function spawnPetals() {
     el.style.width  = w + 'px';
     el.style.height = (w * 1.4) + 'px';
     petals.appendChild(el);
+
+    while (petals.children.length > maxAlive) {
+      petals.firstElementChild?.remove();
+    }
+
     setTimeout(() => el.remove(), 13000);
-  }, 1300);
+    setTimeout(spawn, delay);
+  };
+
+  spawn();
 }
 
 /* ══ REVEAL ON SCROLL ════════════════════════════════════════════════ */
@@ -399,8 +414,10 @@ function observeGallery() {
 /* ══ INIT ════════════════════════════════════════════════════════════ */
 buildGallery();
 makeStars();
-makeFireflies();
-spawnPetals();
+if (!prefersReducedMotion) {
+  makeFireflies();
+  spawnPetals();
+}
 setupReveal();
 observeGallery();
 setPlaying(false);
